@@ -265,13 +265,7 @@ const replyTableInGroup = async (replyToken, arrayUser, arrLoopTable) => {
 
 
         // create array table
-        var arrTable = []
-        for (let index = 0; index <= countTable; index++) {
-
-            arrTable[index] = {
-                members: []
-            }
-        }
+        let arrTable = Array(countTable).fill({members: []})
         //-------------
 
 
