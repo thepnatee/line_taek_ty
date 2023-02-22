@@ -11,6 +11,13 @@ const LINE_HEADER = {
 };
 
 
+const getGroupChatSummary = (groupId) => {
+  return axios({
+    method: 'get',
+    headers: LINE_HEADER,
+    url: `${LINE_MESSAGING_API}/group/${groupId}/summary`
+  });
+};
 const getProfileGroup = (groupId, userId) => {
   return axios({
     method: 'get',
@@ -47,5 +54,6 @@ const verifySignature = (originalSignature, body) => {
 module.exports = {
   reply,
   getProfileGroup,
-  verifySignature
+  verifySignature,
+  getGroupChatSummary
 };
