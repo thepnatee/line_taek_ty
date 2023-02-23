@@ -36,7 +36,7 @@ exports.Webhook = functions.region("asia-northeast1").https.onRequest(async (req
         }
 
 
-        /* 1. Join to Chat Group
+        /*🔥 1. Join to Chat Group 🔥
         https://developers.line.biz/en/reference/messaging-api/#join-event
         {
             "replyToken": "nHuyWiB7yP5Zw52FIkcQobQuGDXCTA",
@@ -53,13 +53,15 @@ exports.Webhook = functions.region("asia-northeast1").https.onRequest(async (req
             }
           }*/
         if (event.type === "join") {
-            /* 1.1 reply util.reply(event.replyToken,messages.welcomeMessage()) */
+
+            /* ✅ 1.1 reply util.reply(event.replyToken,messages.welcomeMessage()) */
             util.reply(event.replyToken, [messages.welcomeMessage()])
-            
+
             return;
         }
 
-        /* 2. Member Joined to Chat Group
+
+        /* 🔥 2. Member Joined to Chat Group 🔥
         https://developers.line.biz/en/reference/messaging-api/#member-joined-event
         "joined": {
             "members": [
@@ -77,25 +79,26 @@ exports.Webhook = functions.region("asia-northeast1").https.onRequest(async (req
             for (const member of event.joined.members) {
                 if (member.type === "user") {
 
-                    /* 2.1 Insert Member & Group ID to DB  */
+                    /* ✅ 2.1 Insert and Update By Group ID to Database  */
                     /* call function insertUserGroup(member.userId, event.source.groupId) */
 
                     let profile = await insertUserGroup(member.userId, event.source.groupId)
 
-                    /* 2.2 Count All Member From Gruop */
-                    /* call function countUserGroup(event.source.groupId);*/
+                    /* ✅ 2.2 Total Member Group From Database */
+                    /* call function countUserGroup(event.source.groupId); */
 
                     let countGroup = await countUserGroup(event.source.groupId)
 
-                    /* 2.3 reply memberJoinedMessage(profile.data.displayName,countGroup) */
-
+                    /* ✅ 2.3 reply memberJoinedMessage(profile.data.displayName,countGroup) */
                     await util.reply(event.replyToken, [messages.memberJoinedMessage(profile.data.displayName, countGroup)])
                 }
             }
             return;
         }
 
-        /* 3. Member Leave From Chat Group
+
+
+        /* 🔥 3. Member Leave From Chat Group 🔥
         https://developers.line.biz/en/reference/messaging-api/#member-left-event
         "left": {
             "members": [
@@ -112,30 +115,37 @@ exports.Webhook = functions.region("asia-northeast1").https.onRequest(async (req
         if (event.type === "memberLeft") {
             for (const member of event.left.members) {
                 if (member.type === "user") {
-                    /*  3.1 call function deleteUserGroup(member.userId, event.source.groupId) */
 
+                    /* ✅ 3.1 call function deleteUserGroup(member.userId, event.source.groupId) */
                     await deleteUserGroup(member.userId, event.source.groupId)
+
                 }
             }
             return;
         }
 
-        /* 4. Event Message */
+
+
+        /* 🔥 4. Event Message 🔥
+        https://developers.line.biz/en/reference/messaging-api/#message-event
+         */
         if (event.type === "message" && event.message.type === "text") {
 
-            /* 4.1 call function : insertUserGroup(event.source.userId, event.source.groupId)  */
+            /* ✅ 4.1 call function : insertUserGroup(event.source.userId, event.source.groupId)  */
             await insertUserGroup(event.source.userId, event.source.groupId)
-
-
 
             let textMessage = event.message.text
 
+
+            /* 🚨 Check Total Member Group From Database */
+
             if (textMessage === "ตี้ฉัน") {
-                /* 4.2 Count  Group : countUserGroup(event.source.groupId) */
+
+                /* ✅ 4.2 Count  Group : countUserGroup(event.source.groupId) */
                 let countGroup = await countUserGroup(event.source.groupId)
 
 
-                /* 4.3 reply message : summaryGroup(countGroup) */
+                /* ✅ 4.3 reply message : summaryGroup(countGroup) */
                 await util.reply(event.replyToken, [messages.summaryGroup(countGroup)])
 
 
@@ -148,61 +158,64 @@ exports.Webhook = functions.region("asia-northeast1").https.onRequest(async (req
 
             if (subStringMessage === "แตก") {
 
-                /* 4.3 call function :  countUserGroup(event.source.groupId) */
+                /* ✅ 4.3 call function :  countUserGroup(event.source.groupId) */
                 let countGroup = await countUserGroup(event.source.groupId)
 
 
-
-                if (splitStringMessage.length > 2 && countGroup >= 2) {
-
-
-                    /* Convert Element to Number and Validate Format  */
-                    const arrayTable = splitStringMessage
-                        .filter(element => subStringMessage !== element)
-                        .map(element => {
-                            const countNumber = Number(element.substring(0, 2));
-                            if (countNumber !== 0 && typeof countNumber === 'number') {
-                                return countNumber;
-                            } else {
-                                throw new Error('Invalid number format');
-                            }
-                        });
-
-
-                    /* Summary Array  */
-                    const sumNumMember = arrayTable.reduce((acc, val) => acc + val, 0);
-
-
-                    if (countGroup === sumNumMember) {
-                        /* 4.5.1 get user list : call functions getUserGroup(event.source.groupId) */
-                        let arrUer = await getUserGroup(event.source.groupId)
-
-                        /* 4.5.1 check arra user list > 0  */
-                        if (arrUer) {
-
-                            /* 4.5.2 passing value to shuffle function : replyTableInGroup(event.replyToken, arrUer, arrayTable) */
-                            await replyTableInGroup(event.replyToken, arrUer, arrayTable)
-                            return;
-                        }
-                    } else {
-
-                        /* [reoply error message] summary group from array not equl all member in group  */
-                        await util.reply(event.replyToken, [messages.summaryGroupError(countGroup, sumNumMember)]);
-                        return;
-                    }
-
-
-                } else {
-                    /* [reoply error message] check table less 2  */
+                /* ❌ [Reply Error Message] check table less 2 and all member group less 2  */
+                if (splitStringMessage.length < 2 && countGroup <= 2) {
                     await util.reply(event.replyToken, [messages.countTableError(countGroup)]);
                     return;
                 }
+
+                /* 🔎 Convert Element to Number and Validate Format  */
+                const arrayTable = splitStringMessage
+                    .filter(element => subStringMessage !== element)
+                    .map(async element => {
+                        const countNumber = Number(element.substring(0, 2));
+                        if (!isNaN(element)  && countNumber !== 0) {
+                            return (!isNaN(element)  && countNumber !== 0);
+                        } else {
+                            await util.reply(event.replyToken, [messages.formatError()]);
+                            throw new Error('❌ Invalid number format');
+                        }
+                    });
+
+                /* Summary Array */
+                const sumNumMember = arrayTable.reduce((acc, val) => acc + val, 0);
+
+                console.log("countGroup", countGroup);
+                console.log("sumNumMember", sumNumMember);
+                if (countGroup !== sumNumMember) {
+
+                    /* ❌[reoply error message] summary group from array not equl all member in group  */
+                    await util.reply(event.replyToken, [messages.summaryGroupError(countGroup, sumNumMember)]);
+                    return;
+
+                } else {
+
+                    /* ✅ 4.5.1 get user list : call functions getUserGroup(event.source.groupId) */
+                    let arrUer = await getUserGroup(event.source.groupId)
+
+                    if (arrUer) {
+
+                        /* ✅ 4.5.2 passing value to shuffle function : replyTableInGroup(event.replyToken, arrUer, arrayTable) */
+                        await replyTableInGroup(event.replyToken, arrUer, arrayTable)
+                        return;
+
+                    }
+                }
+
+
+
+
+
             }
 
         }
 
 
-        /* 5. Leave From Chat Group
+        /* 🔥 5. Leave From Chat Group 🔥
         https://developers.line.biz/en/reference/messaging-api/#leave-event
         {
             "type": "leave",
@@ -218,9 +231,9 @@ exports.Webhook = functions.region("asia-northeast1").https.onRequest(async (req
             }
           }  */
         if (event.type === "leave") {
-            /* 5.1 call function deleteGroup(event.source.groupId);  */
-            await deleteGroup(event.source.groupId)
 
+            /* 5.1 ✅ call function deleteGroup(event.source.groupId);  */
+            await deleteGroup(event.source.groupId)
             return;
         }
 
@@ -301,13 +314,9 @@ const getUserGroup = async (groupId) => {
 const replyTableInGroup = async (replyToken, arrayUser, arrayTable) => {
 
 
-    console.log("arrayUser ", arrayUser);
-
     /* randomize (shuffle) : shuffleArray(arrayUser) */
     let shuffleUser = await shuffleArray(arrayUser)
 
-
-    console.log("shuffleUser ", shuffleUser);
 
     /* Create Maximum Table : crateTable(arrayTable.length)  */
     let arrTable = await createTable(arrayTable.length)
