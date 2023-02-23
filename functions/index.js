@@ -56,7 +56,6 @@ exports.Webhook = functions.region("asia-northeast1").https.onRequest(async (req
 
             /* ✅ 1.1 reply util.reply(event.replyToken,messages.welcomeMessage()) */
             util.reply(event.replyToken, [messages.welcomeMessage()])
-
             return;
         }
 
@@ -143,24 +142,18 @@ exports.Webhook = functions.region("asia-northeast1").https.onRequest(async (req
 
                 /* ✅ 4.2 Count  Group : countUserGroup(event.source.groupId) */
                 let countGroup = await countUserGroup(event.source.groupId)
-
-
                 /* ✅ 4.3 reply message : summaryGroup(countGroup) */
                 await util.reply(event.replyToken, [messages.summaryGroup(countGroup)])
-
-
                 return;
             }
 
 
             let splitStringMessage = textMessage.split(' ')
             let subStringMessage = splitStringMessage[0].substring(0, 4)
-
             if (subStringMessage === "แตก") {
 
                 /* ✅ 4.3 call function :  countUserGroup(event.source.groupId) */
                 let countGroup = await countUserGroup(event.source.groupId)
-
 
                 /* ❌ [Reply Error Message] check table less 2 and all member group less 2  */
                 if (splitStringMessage.length < 2 && countGroup <= 2) {
@@ -171,42 +164,32 @@ exports.Webhook = functions.region("asia-northeast1").https.onRequest(async (req
                 /* 🔎 Convert Element to Number and Validate Format  */
                 const arrayTable = splitStringMessage
                     .filter(element => subStringMessage !== element)
-                    .map(async element => {
+                    .map(element => {
                         const countNumber = Number(element.substring(0, 2));
-                        if (!isNaN(element)  && countNumber !== 0) {
-                            return (!isNaN(element)  && countNumber !== 0);
+                        if (!isNaN(element) && countNumber !== 0) {
+                            return countNumber;
                         } else {
-                            await util.reply(event.replyToken, [messages.formatError()]);
                             throw new Error('❌ Invalid number format');
                         }
                     });
 
                 /* Summary Array */
                 const sumNumMember = arrayTable.reduce((acc, val) => acc + val, 0);
-
                 if (countGroup !== sumNumMember) {
-
                     /* ❌[reoply error message] summary group from array not equl all member in group  */
                     await util.reply(event.replyToken, [messages.summaryGroupError(countGroup, sumNumMember)]);
                     return;
-
-                } else {
-
-                    /* ✅ 4.5.1 get user list : call functions getUserGroup(event.source.groupId) */
-                    let arrUer = await getUserGroup(event.source.groupId)
-
-                    if (arrUer) {
-
-                        /* ✅ 4.5.2 passing value to shuffle function : replyTableInGroup(event.replyToken, arrUer, arrayTable) */
-                        await replyTableInGroup(event.replyToken, arrUer, arrayTable)
-                        return;
-
-                    }
                 }
 
 
+                /* ✅ 4.5.1 get user list : call functions getUserGroup(event.source.groupId) */
+                let arrUer = await getUserGroup(event.source.groupId)
+                if (arrUer) {
+                    /* ✅ 4.5.2 passing value to shuffle function : replyTableInGroup(event.replyToken, arrUer, arrayTable) */
+                    await replyTableInGroup(event.replyToken, arrUer, arrayTable);
+                    return;
 
-
+                }
 
             }
 
@@ -229,7 +212,6 @@ exports.Webhook = functions.region("asia-northeast1").https.onRequest(async (req
             }
           }  */
         if (event.type === "leave") {
-
             /* 5.1 ✅ call function deleteGroup(event.source.groupId);  */
             await deleteGroup(event.source.groupId)
             return;
