@@ -184,8 +184,6 @@ exports.Webhook = functions.region("asia-northeast1").https.onRequest(async (req
                 /* Summary Array */
                 const sumNumMember = arrayTable.reduce((acc, val) => acc + val, 0);
 
-                console.log("countGroup", countGroup);
-                console.log("sumNumMember", sumNumMember);
                 if (countGroup !== sumNumMember) {
 
                     /* ❌[reoply error message] summary group from array not equl all member in group  */
