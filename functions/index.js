@@ -33,8 +33,7 @@ exports.Webhook = functions.region("asia-northeast1").https.onRequest(async (req
     for (const event of events) {
         if (event.source.type !== "group") {
             return;
-        }
-
+        }  
 
         /*🔥 1. Join to Chat Group 🔥
         https://developers.line.biz/en/reference/messaging-api/#join-event
@@ -53,7 +52,6 @@ exports.Webhook = functions.region("asia-northeast1").https.onRequest(async (req
             }
           }*/
         if (event.type === "join") {
-
             /* ✅ 1.1 reply util.reply(event.replyToken,messages.welcomeMessage()) */
             util.reply(event.replyToken, [messages.welcomeMessage()])
             return;
@@ -82,11 +80,12 @@ exports.Webhook = functions.region("asia-northeast1").https.onRequest(async (req
                     /* call function insertUserGroup(member.userId, event.source.groupId) */
 
                     let profile = await insertUserGroup(member.userId, event.source.groupId)
-
                     /* ✅ 2.2 Total Member Group From Database */
                     /* call function countUserGroup(event.source.groupId); */
 
                     let countGroup = await countUserGroup(event.source.groupId)
+
+                    console.log(" All Group Member : ", countGroup);
 
                     /* ✅ 2.3 reply memberJoinedMessage(profile.data.displayName,countGroup) */
                     await util.reply(event.replyToken, [messages.memberJoinedMessage(profile.data.displayName, countGroup)])
@@ -97,40 +96,14 @@ exports.Webhook = functions.region("asia-northeast1").https.onRequest(async (req
 
 
 
-        /* 🔥 3. Member Leave From Chat Group 🔥
-        https://developers.line.biz/en/reference/messaging-api/#member-left-event
-        "left": {
-            "members": [
-              {
-                "type": "user",
-                "userId": "U4af4980629..."
-              },
-              {
-                "type": "user",
-                "userId": "U91eeaf62d9..."
-              }
-            ]
-          }*/
-        if (event.type === "memberLeft") {
-            for (const member of event.left.members) {
-                if (member.type === "user") {
-
-                    /* ✅ 3.1 call function deleteUserGroup(member.userId, event.source.groupId) */
-                    await deleteUserGroup(member.userId, event.source.groupId)
-
-                }
-            }
-            return;
-        }
 
 
-
-        /* 🔥 4. Event Message 🔥
+        /* 🔥 3. Event Message 🔥
         https://developers.line.biz/en/reference/messaging-api/#message-event
          */
         if (event.type === "message" && event.message.type === "text") {
 
-            /* ✅ 4.1 call function : insertUserGroup(event.source.userId, event.source.groupId)  */
+            /* ✅ 3.1 call function : insertUserGroup(event.source.userId, event.source.groupId)  */
             await insertUserGroup(event.source.userId, event.source.groupId)
 
             let textMessage = event.message.text
@@ -139,9 +112,9 @@ exports.Webhook = functions.region("asia-northeast1").https.onRequest(async (req
             /* 🚨 Check Total Member Group From Database */
             if (textMessage === "ตี้ฉัน") {
 
-                /* ✅ 4.2 Count  Group : countUserGroup(event.source.groupId) */
+                /* ✅ 3.2 Count  Group : countUserGroup(event.source.groupId) */
                 let countGroup = await countUserGroup(event.source.groupId)
-                /* ✅ 4.3 reply message : summaryGroup(countGroup) */
+                /* ✅ 3.3 reply message : summaryGroup(countGroup) */
                 await util.reply(event.replyToken, [messages.summaryGroup(countGroup)])
                 return;
             }
@@ -152,7 +125,7 @@ exports.Webhook = functions.region("asia-northeast1").https.onRequest(async (req
             let subStringMessage = splitStringMessage[0].substring(0, 4)
             if (subStringMessage === "แตก") {
 
-                /* ✅ 4.3 call function :  countUserGroup(event.source.groupId) */
+                /* ✅ 3.4 call function :  countUserGroup(event.source.groupId) */
                 let countGroup = await countUserGroup(event.source.groupId)
 
 
@@ -185,10 +158,10 @@ exports.Webhook = functions.region("asia-northeast1").https.onRequest(async (req
 
 
 
-                /* ✅ 4.5.1 get user list : call functions getUserGroup(event.source.groupId) */
+                /* ✅ 3.5.1 get user list : call functions getUserGroup(event.source.groupId) */
                 let arrUer = await getUserGroup(event.source.groupId)
                 if (arrUer) {
-                    /* ✅ 4.5.2 passing value to shuffle function : replyTableInGroup(event.replyToken, arrUer, arrayTable) */
+                    /* ✅ 3.5.2 passing value to shuffle function : replyTableInGroup(event.replyToken, arrUer, arrayTable) */
                     await replyTableInGroup(event.replyToken, arrUer, arrayTable);
                     return;
 
@@ -196,6 +169,35 @@ exports.Webhook = functions.region("asia-northeast1").https.onRequest(async (req
 
             }
 
+        }
+
+
+
+
+        /* 🔥 4. Member Leave From Chat Group 🔥
+        https://developers.line.biz/en/reference/messaging-api/#member-left-event
+        "left": {
+            "members": [
+              {
+                "type": "user",
+                "userId": "U4af4980629..."
+              },
+              {
+                "type": "user",
+                "userId": "U91eeaf62d9..."
+              }
+            ]
+          }*/
+          if (event.type === "memberLeft") {
+            for (const member of event.left.members) {
+                if (member.type === "user") {
+
+                    /* ✅ 4.1 call function deleteUserGroup(member.userId, event.source.groupId) */
+                    await deleteUserGroup(member.userId, event.source.groupId)
+
+                }
+            }
+            return;
         }
 
 
