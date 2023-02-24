@@ -9,6 +9,7 @@ const {
 } = require('firebase-admin/firestore');
 const functions = require("firebase-functions");
 const serviceAccount = require('./config.json');
+const { log } = require('firebase-functions/logger');
 
 initializeApp({
     credential: cert(serviceAccount)
@@ -82,11 +83,7 @@ exports.Webhook = functions.region("asia-northeast1").https.onRequest(async (req
                     let profile = await insertUserGroup(member.userId, event.source.groupId)
                     /* ✅ 2.2 Total Member Group From Database */
                     /* call function countUserGroup(event.source.groupId); */
-
                     let countGroup = await countUserGroup(event.source.groupId)
-
-                    console.log(" All Group Member : ", countGroup);
-
                     /* ✅ 2.3 reply memberJoinedMessage(profile.data.displayName,countGroup) */
                     await util.reply(event.replyToken, [messages.memberJoinedMessage(profile.data.displayName, countGroup)])
                 }
