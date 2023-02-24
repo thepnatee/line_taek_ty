@@ -50,7 +50,7 @@ const summaryGroupError = (countGroup, sumNumMember) => ({
 
 const countTableError = (countGroup) => ({
   type: "text",
-  text: "โปรดระบุจำนวนโต๊ะ มากกว่า 2 โต๊ะ ให้เท่ากับจำนวนคน \n ปัจจุบัน:" + countGroup + " คน"
+  text: "โปรดระบุจำนวนโต๊ะ มากกว่า 2 โต๊ะให้เหมาะกับจำนวนคน  \n\n ปัจจุบันมีสมาชิก:" + countGroup + " คน"
 })
 
 const finalNamelist = (nameList) => ({

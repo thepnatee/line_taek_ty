@@ -137,7 +137,6 @@ exports.Webhook = functions.region("asia-northeast1").https.onRequest(async (req
 
 
             /* 🚨 Check Total Member Group From Database */
-
             if (textMessage === "ตี้ฉัน") {
 
                 /* ✅ 4.2 Count  Group : countUserGroup(event.source.groupId) */
@@ -148,6 +147,7 @@ exports.Webhook = functions.region("asia-northeast1").https.onRequest(async (req
             }
 
 
+            /* 🚀 main feature  */
             let splitStringMessage = textMessage.split(' ')
             let subStringMessage = splitStringMessage[0].substring(0, 4)
             if (subStringMessage === "แตก") {
@@ -155,11 +155,6 @@ exports.Webhook = functions.region("asia-northeast1").https.onRequest(async (req
                 /* ✅ 4.3 call function :  countUserGroup(event.source.groupId) */
                 let countGroup = await countUserGroup(event.source.groupId)
 
-                /* ❌ [Reply Error Message] check table less 2 and all member group less 2  */
-                if (splitStringMessage.length < 2 && countGroup <= 2) {
-                    await util.reply(event.replyToken, [messages.countTableError(countGroup)]);
-                    return;
-                }
 
                 /* 🔎 Convert Element to Number and Validate Format  */
                 const arrayTable = splitStringMessage
@@ -173,13 +168,21 @@ exports.Webhook = functions.region("asia-northeast1").https.onRequest(async (req
                         }
                     });
 
-                /* Summary Array */
+                /* 🔎 Summary Array */
                 const sumNumMember = arrayTable.reduce((acc, val) => acc + val, 0);
+
+
+                /* ❌[reoply error message] summary group from array not equl all member in group  */
                 if (countGroup !== sumNumMember) {
-                    /* ❌[reoply error message] summary group from array not equl all member in group  */
                     await util.reply(event.replyToken, [messages.summaryGroupError(countGroup, sumNumMember)]);
                     return;
                 }
+                /* ❌ [Reply Error Message] check table less 2 */
+                if (arrayTable.length < 2) {
+                    await util.reply(event.replyToken, [messages.countTableError(countGroup)]);
+                    return;
+                }
+
 
 
                 /* ✅ 4.5.1 get user list : call functions getUserGroup(event.source.groupId) */
@@ -294,12 +297,19 @@ const getUserGroup = async (groupId) => {
 const replyTableInGroup = async (replyToken, arrayUser, arrayTable) => {
 
 
-    /* randomize (shuffle) : shuffleArray(arrayUser) */
+    /* 
+       randomize (shuffle) : shuffleArray(arrayUser) 
+       Array User List From Database
+    */
     let shuffleUser = await shuffleArray(arrayUser)
 
 
-    /* Create Maximum Table : crateTable(arrayTable.length)  */
-    let arrTable = await createTable(arrayTable.length)
+    /* 
+        Create Table : crateTable(arrayTable.length)
+        const countTable : Maximum Table Available
+    */
+    const countTable = 20
+    let arrTable = await createTable(countTable, arrayTable.length)
 
 
 
@@ -328,7 +338,6 @@ const replyTableInGroup = async (replyToken, arrayUser, arrayTable) => {
 
     });
     nameList += " แตกโต๊ะ แต่ไม่แตกแยก กลับมาแตกด้วยกันใหม่น้า "
-
     await util.reply(replyToken, [messages.finalNamelist(nameList)]);
 
 
@@ -344,10 +353,7 @@ const shuffleArray = async (array) => {
 }
 
 /* Create Maximum Table */
-const createTable = async (arrayTableLength) => {
-    /* setup max table */
-    const countTable = 20
-
+const createTable = async (countTable, arrayTableLength) => {
     if (arrayTableLength > countTable) {
         return;
     }
