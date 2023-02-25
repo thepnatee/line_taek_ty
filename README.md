@@ -1,12 +1,17 @@
 
 # LINE แตกตี้
 
+Shell Directory Folder
+````
+cd functions
+
+````
 Install Package
 ````
 npm i
 ````
 
-firebase emulators:start
+Firebase emulators:start
 
 ````
 npm run serve
