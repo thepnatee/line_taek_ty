@@ -1,4 +1,26 @@
+
 # LINE แตกตี้
+
+Install Package
+````
+npm i
+````
+
+firebase emulators:start
+
+````
+npm run serve
+````
+
+Deploy
+
+````
+npm run deploy
+````
+
+
+-----
+## Story
 
 ADD : https://lin.ee/n8WUbl7
 
@@ -29,20 +51,20 @@ ADD : https://lin.ee/n8WUbl7
 # LINE API
 -----
 
-🔥 1. Join to Chat Group 🔥
+1. Join to Chat Group
 https://developers.line.biz/en/reference/messaging-api/#join-event
 
 
-🔥 2. Member Joined to Chat Group 🔥
+2. Member Joined to Chat Group
 https://developers.line.biz/en/reference/messaging-api/#member-joined-event
         
 
-🔥 3. Event Message 🔥
+3. Event Message
 https://developers.line.biz/en/reference/messaging-api/#message-event
 
-🔥 4. Member Leave From Chat Group 🔥
+4. Member Leave From Chat Group
 https://developers.line.biz/en/reference/messaging-api/#member-left-event
 
-🔥 5. Leave From Chat Group 🔥
+5. Leave From Chat Group
 https://developers.line.biz/en/reference/messaging-api/#leave-event
 
