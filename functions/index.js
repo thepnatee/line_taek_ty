@@ -37,8 +37,9 @@ exports.Webhook = functions.region("asia-northeast1").https.onRequest(async (req
         https://developers.line.biz/en/reference/messaging-api/#join-event
         */
         if (event.type === "join") {
-            /* ✅ 1.1 reply util.reply(event.replyToken,messages.welcomeMessage()) */
-            await util.reply(event.replyToken, [messages.welcomeMessage()])
+            /* ✅ 1.1 [join] reply util.reply(event.replyToken,[messages.welcomeMessage()]) */
+            // await util.reply(event.replyToken, [messages.welcomeMessage()])
+                await util.reply(event.replyToken, [messages.welcomeMessage()])
             return;
         }
 
@@ -49,22 +50,20 @@ exports.Webhook = functions.region("asia-northeast1").https.onRequest(async (req
         if (event.type === "memberJoined") {
             for (let member of event.joined.members) {
                 if (member.type === "user") {
-                    /* ✅ 2.1 Insert and Update By Group ID to Database  */
+                    /* ✅ 2.1 [profile] Insert and Update By Group ID to Database  */
                     /* call function insertUserGroup(member.userId, event.source.groupId) */
                     let profile = await insertUserGroup(member.userId, event.source.groupId)
-                    /* ✅ 2.2 Total Member Group From Database */
+
+                    /* ✅ 2.2 [countGroup] Total Member Group From Database */
                     /* call function countUserGroup(event.source.groupId); */
                     let countGroup = await countUserGroup(event.source.groupId)
 
-                    /* ✅ 2.3 reply memberJoinedMessage(profile.data.displayName,countGroup) */
+                    /* ✅ 2.3 [memberJoined] reply [memberJoinedMessage(profile.data.displayName,countGroup)] */
                     await util.reply(event.replyToken, [messages.memberJoinedMessage(profile.data.displayName, countGroup)])
                 }
             }
             return;
         }
-
-
-
 
 
         /* 🔥 3. Event Message 🔥
@@ -83,8 +82,10 @@ exports.Webhook = functions.region("asia-northeast1").https.onRequest(async (req
 
                 /* ✅ 3.2 Count  Group : countUserGroup(event.source.groupId) */
                 let countGroup = await countUserGroup(event.source.groupId)
-                /* ✅ 3.3 reply message : summaryGroup(countGroup) */
+
+                /* ✅ 3.3 [summaryGroup] reply message : summaryGroup(countGroup) */
                 await util.reply(event.replyToken, [messages.summaryGroup(countGroup)])
+
                 return;
             }
 
@@ -96,7 +97,6 @@ exports.Webhook = functions.region("asia-northeast1").https.onRequest(async (req
 
                 /* ✅ 3.4 call function :  countUserGroup(event.source.groupId) */
                 let countGroup = await countUserGroup(event.source.groupId)
-
 
                 /* 🔎 Validate Element Array from 
                     subStringMessage = แตก
@@ -119,7 +119,7 @@ exports.Webhook = functions.region("asia-northeast1").https.onRequest(async (req
                     return;
                 }
 
-                /* ✅ 3.5 call function :  shuffleTableGroup(event.replyToken,event.source.groupId, arrayTable) */
+                /* ✅ 3.5 [shuffleTableGroup]call function :  shuffleTableGroup(event.replyToken,event.source.groupId, arrayTable) */
                 await shuffleTableGroup(event.replyToken, event.source.groupId, arrayTable);
                 return;
 
@@ -128,15 +128,13 @@ exports.Webhook = functions.region("asia-northeast1").https.onRequest(async (req
         }
 
 
-
-
         /* 🔥 4. Member Leave From Chat Group 🔥
         https://developers.line.biz/en/reference/messaging-api/#member-left-event
         */
         if (event.type === "memberLeft") {
             for (const member of event.left.members) {
                 if (member.type === "user") {
-                    /* ✅ 4.1 call function deleteUserGroup(member.userId, event.source.groupId) */
+                    /* ✅ 4.1 [deleteUserGroup] call function deleteUserGroup(member.userId, event.source.groupId) */
                     await deleteUserGroup(member.userId, event.source.groupId)
 
                 }
@@ -149,7 +147,7 @@ exports.Webhook = functions.region("asia-northeast1").https.onRequest(async (req
         https://developers.line.biz/en/reference/messaging-api/#leave-event
         */
         if (event.type === "leave") {
-            /* 5.1 ✅ call function deleteGroup(event.source.groupId);  */
+            /* 5.1 ✅ [deleteGroup] call function deleteGroup(event.source.groupId);  */
             await deleteGroup(event.source.groupId)
             return;
         }
